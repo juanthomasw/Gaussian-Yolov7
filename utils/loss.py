@@ -429,6 +429,7 @@ class ComputeLoss:
         # Define criteria
         BCEcls = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([h['cls_pw']], device=device))
         BCEobj = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([h['obj_pw']], device=device))
+        NLLbox = nn.GaussianNLLLoss(device=device)
 
         # Class label smoothing https://arxiv.org/pdf/1902.04103.pdf eqn 3
         self.cp, self.cn = smooth_BCE(eps=h.get('label_smoothing', 0.0))  # positive, negative BCE targets
@@ -470,7 +471,7 @@ class ComputeLoss:
                 pvarxy = ps[:, 4:6].sigmoid()
                 pvarwh = ps[:, 6:8].sigmoid()
                 pvarbox = torch.cat((pvarxy, pvarwh), 1)
-                lnll = self._gaussian_dist_pdf(pbox.T, tbox[i], pvarbox.T)
+                lnll = self.NLLbox(pbox.T, tbox[i], pvarbox.T)
                 
                 lbox += ((1.0 - iou).mean() + lnll) # iou loss
 
@@ -503,8 +504,6 @@ class ComputeLoss:
         loss = lbox + lobj + lcls
         return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
 
-    def _gaussian_dist_pdf(self, val, mean, var):
-        return torch.exp(- (val - mean) ** 2.0 / var / 2.0) / torch.sqrt(2.0 * np.pi * var)
 
     def build_targets(self, p, targets):
         # Build targets for compute_loss(), input targets(image,class,x,y,w,h)
@@ -572,6 +571,7 @@ class ComputeLossOTA:
         # Define criteria
         BCEcls = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([h['cls_pw']], device=device))
         BCEobj = nn.BCEWithLogitsLoss(pos_weight=torch.tensor([h['obj_pw']], device=device))
+        NLLbox = nn.GaussianNLLLoss(device=device)
 
         # Class label smoothing https://arxiv.org/pdf/1902.04103.pdf eqn 3
         self.cp, self.cn = smooth_BCE(eps=h.get('label_smoothing', 0.0))  # positive, negative BCE targets
@@ -617,7 +617,7 @@ class ComputeLossOTA:
                 pvarxy = ps[:, 4:6].sigmoid()
                 pvarwh = ps[:, 6:8].sigmoid()
                 pvarbox = torch.cat((pvarxy, pvarwh), 1)
-                lnll = self._gaussian_dist_pdf(pbox.T, selected_tbox, pvarbox.T)
+                lnll = self.NLLbox(pbox.T, selected_tbox, pvarbox.T)
                 
                 lbox += ((1.0 - iou).mean() + lnll) # iou loss
 
@@ -649,9 +649,6 @@ class ComputeLossOTA:
 
         loss = lbox + lobj + lcls
         return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
-
-    def _gaussian_dist_pdf(self, val, mean, var):
-        return torch.exp(- (val - mean) ** 2.0 / var / 2.0) / torch.sqrt(2.0 * np.pi * var)
 
     def build_targets(self, p, targets, imgs):
         
