@@ -466,7 +466,13 @@ class ComputeLoss:
                 pwh = (ps[:, 2:4].sigmoid() * 2) ** 2 * anchors[i]
                 pbox = torch.cat((pxy, pwh), 1)  # predicted box
                 iou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, CIoU=True)  # iou(prediction, target)
-                lbox += (1.0 - iou).mean()  # iou loss
+
+                pvarxy = ps[:, 4:6].sigmoid()
+                pvarwh = ps[:, 6:8].sigmoid()
+                pvarbox = torch.cat((pvarxy, pvarwh), 1)
+                lnll = self._gaussian_dist_pdf(pbox.T, tbox[i], pvarbox.T)
+                
+                lbox += ((1.0 - iou).mean() + lnll) # iou loss
 
                 # Objectness
                 tobj[b, a, gj, gi] = (1.0 - self.gr) + self.gr * iou.detach().clamp(0).type(tobj.dtype)  # iou ratio
@@ -496,6 +502,9 @@ class ComputeLoss:
 
         loss = lbox + lobj + lcls
         return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
+
+    def _gaussian_dist_pdf(self, val, mean, var):
+        return torch.exp(- (val - mean) ** 2.0 / var / 2.0) / torch.sqrt(2.0 * np.pi * var)
 
     def build_targets(self, p, targets):
         # Build targets for compute_loss(), input targets(image,class,x,y,w,h)
@@ -604,7 +613,13 @@ class ComputeLossOTA:
                 selected_tbox = targets[i][:, 2:6] * pre_gen_gains[i]
                 selected_tbox[:, :2] -= grid
                 iou = bbox_iou(pbox.T, selected_tbox, x1y1x2y2=False, CIoU=True)  # iou(prediction, target)
-                lbox += (1.0 - iou).mean()  # iou loss
+                
+                pvarxy = ps[:, 4:6].sigmoid()
+                pvarwh = ps[:, 6:8].sigmoid()
+                pvarbox = torch.cat((pvarxy, pvarwh), 1)
+                lnll = self._gaussian_dist_pdf(pbox.T, selected_tbox, pvarbox.T)
+                
+                lbox += ((1.0 - iou).mean() + lnll) # iou loss
 
                 # Objectness
                 tobj[b, a, gj, gi] = (1.0 - self.gr) + self.gr * iou.detach().clamp(0).type(tobj.dtype)  # iou ratio
