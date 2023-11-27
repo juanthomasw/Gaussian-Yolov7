@@ -635,6 +635,9 @@ class ComputeLossOTA:
         loss = lbox + lobj + lcls
         return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
 
+    def _gaussian_dist_pdf(self, val, mean, var):
+        return torch.exp(- (val - mean) ** 2.0 / var / 2.0) / torch.sqrt(2.0 * np.pi * var)
+
     def build_targets(self, p, targets, imgs):
         
         #indices, anch = self.find_positive(p, targets)
