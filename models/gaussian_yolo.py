@@ -56,15 +56,25 @@ class Detect(nn.Module):
                 if not torch.onnx.is_in_onnx_export():
                     y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  # xy compensation term
                     y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh compensation term
+
+                    sigma_xywh = y[..., 4:8]
+                    sigma = sigma_xywh.mean(dim=-1)
+                    y[..., 8] *= (1.0 - sigma)
                     
                 else:
                     xy = y[..., 0:2]
                     wh = y[..., 2:4]
-                    others = y[..., 4:]
+                    sigma_xywh = y[..., 4:8]
+                    c_obj = y[..., 8:9]
+                    c_cls = y[..., 9:]
                     
                     xy = xy * (2. * self.stride[i]) + (self.stride[i] * (self.grid[i] - 0.5))  # new xy
                     wh = wh ** 2 * (4 * self.anchor_grid[i].data)  # new wh
-                    y = torch.cat((xy, wh, others), 4)
+
+                    sigma = sigma_xywh.mean(dim=-1)
+                    c_obj *= (1.0 - sigma)
+                    
+                    y = torch.cat((xy, wh, sigma_xywh, c_obj, c_cls), 4)
                     
                 z.append(y.view(bs, -1, self.no))
 
@@ -139,6 +149,10 @@ class IDetect(nn.Module):
                 y = x[i].sigmoid()
                 y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  # xy compensation term
                 y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh compensation term
+
+                sigma_xywh = y[..., 4:8]
+                sigma = sigma_xywh.mean(dim=-1)
+                y[..., 8] *= (1.0 - sigma)
                 
                 z.append(y.view(bs, -1, self.no)) # flatten tensor along second dimension -> shape(ns, na*nx*ny, no)
 
@@ -161,15 +175,25 @@ class IDetect(nn.Module):
                 if not torch.onnx.is_in_onnx_export():
                     y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  # xy
                     y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh
+
+                    sigma_xywh = y[..., 4:8]
+                    sigma = sigma_xywh.mean(dim=-1)
+                    y[..., 8] *= (1.0 - sigma)
                 
                 else:
                     xy = y[..., 0:2]
                     wh = y[..., 2:4]
-                    others = y[..., 4:]
+                    sigma_xywh = y[..., 4:8]
+                    c_obj = y[..., 8:9]
+                    c_cls = y[..., 9:]
                     
                     xy = xy * (2. * self.stride[i]) + (self.stride[i] * (self.grid[i] - 0.5))  # new xy
                     wh = wh ** 2 * (4 * self.anchor_grid[i].data)  # new wh
-                    y = torch.cat((xy, wh, others), 4)
+
+                    sigma = sigma_xywh.mean(dim=-1)
+                    c_obj *= (1.0 - sigma)
+                    
+                    y = torch.cat((xy, wh, sigma_xywh, c_obj, c_cls), 4)
                     
                 z.append(y.view(bs, -1, no)) # flatten tensor along second dimension -> shape(ns, na*nx*ny, no)
 
