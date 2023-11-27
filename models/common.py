@@ -13,7 +13,7 @@ from PIL import Image
 from torch.cuda import amp
 
 from utils.datasets import letterbox
-from utils.general import non_max_suppression, make_divisible, scale_coords, increment_path, xyxy2xywh
+from utils.general import non_max_suppression_gaussian, make_divisible, scale_coords, increment_path, xyxy2xywh
 from utils.plots import color_list, plot_one_box
 from utils.torch_utils import time_synchronized
 
@@ -859,7 +859,7 @@ class NMS(nn.Module):
         super(NMS, self).__init__()
 
     def forward(self, x):
-        return non_max_suppression(x[0], conf_thres=self.conf, iou_thres=self.iou, classes=self.classes)
+        return non_max_suppression_gaussian(x[0], conf_thres=self.conf, iou_thres=self.iou, classes=self.classes)
 
 
 class autoShape(nn.Module):
