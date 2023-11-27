@@ -471,7 +471,7 @@ class ComputeLoss:
                 pvarxy = ps[:, 4:6].sigmoid()
                 pvarwh = ps[:, 6:8].sigmoid()
                 pvarbox = torch.cat((pvarxy, pvarwh), 1)
-                lnll = self.NLLbox(pbox.T, tbox[i], pvarbox.T)
+                lnll = self.NLLbox(pbox.T, tbox[i].T, pvarbox.T)
                 
                 lbox += ((1.0 - iou).mean() + lnll) # iou loss
 
@@ -617,7 +617,7 @@ class ComputeLossOTA:
                 pvarxy = ps[:, 4:6].sigmoid()
                 pvarwh = ps[:, 6:8].sigmoid()
                 pvarbox = torch.cat((pvarxy, pvarwh), 1)
-                lnll = self.NLLbox(pbox.T, selected_tbox, pvarbox.T)
+                lnll = self.NLLbox(pbox.T, selected_tbox.T, pvarbox.T)
                 
                 lbox += ((1.0 - iou).mean() + lnll) # iou loss
 
