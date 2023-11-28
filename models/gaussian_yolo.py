@@ -565,9 +565,6 @@ class Model(nn.Module):
         self.names = [str(i) for i in range(self.yaml['nc'])]  # default names
         # print([x.shape for x in self.forward(torch.zeros(1, ch, 64, 64))])
 
-        # Access the value of the 'gaussian' parameter
-        gaussian = self.yaml.get('gaussian', False)  # Default to False if 'gaussian' is not present
-
         # Build strides, anchors
         m = self.model[-1]  # Detect()
         if isinstance(m, Detect):
