@@ -106,7 +106,7 @@ class Detect(nn.Module):
         convert_matrix = torch.tensor([[1, 0, 1, 0], [0, 1, 0, 1], [-0.5, 0, 0.5, 0], [0, -0.5, 0, 0.5]],
                                            dtype=torch.float32,
                                            device=z.device)
-        box @= convert_matrix                          
+        box[:,:,:4] @= convert_matrix                          
         return (box, score)
 
 
@@ -239,7 +239,7 @@ class IDetect(nn.Module):
         convert_matrix = torch.tensor([[1, 0, 1, 0], [0, 1, 0, 1], [-0.5, 0, 0.5, 0], [0, -0.5, 0, 0.5]],
                                            dtype=torch.float32,
                                            device=z.device)
-        box @= convert_matrix                          
+        box[:,:,:4] @= convert_matrix                          
         return (box, score)
 
 
