@@ -774,8 +774,7 @@ def non_max_suppression_gaussian(prediction, conf_thres=0.25, iou_thres=0.45, cl
 
         # Batched NMS
         c = x[:, 9:10] * (0 if agnostic else max_wh)  # classes
-        boxes, scores = x[:, :4], x[:, 8]  # boxes (offset by class), scores
-        boxes[:, :2] += c.view(-1,1)
+        boxes, scores = x[:, :4] + c, x[:, 8]  # boxes (offset by class), scores
         
         i = torchvision.ops.nms(boxes, scores, iou_thres)  # NMS
         if i.shape[0] > max_det:  # limit detections
