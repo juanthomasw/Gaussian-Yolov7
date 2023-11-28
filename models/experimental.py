@@ -125,7 +125,7 @@ class TRT_NMS(torch.autograd.Function):
     ):
         batch_size, num_boxes, num_classes = scores.shape
         num_det = torch.randint(0, max_output_boxes, (batch_size, 1), dtype=torch.int32)
-        det_boxes = torch.randn(batch_size, max_output_boxes, 4)
+        det_boxes = torch.randn(batch_size, max_output_boxes, 8)
         det_scores = torch.randn(batch_size, max_output_boxes)
         det_classes = torch.randint(0, num_classes, (batch_size, max_output_boxes), dtype=torch.int32)
         return num_det, det_boxes, det_scores, det_classes
@@ -171,15 +171,15 @@ class ONNX_ORT(nn.Module):
         self.n_classes=n_classes
 
     def forward(self, x):
-        boxes = x[:, :, :4]
-        conf = x[:, :, 4:5]
-        scores = x[:, :, 5:]
+        boxes = x[:, :, :8]
+        conf = x[:, :, 8:9]
+        scores = x[:, :, 9:]
         if self.n_classes == 1:
             scores = conf # for models with one class, cls_loss is 0 and cls_conf is always 0.5,
                                  # so there is no need to multiplicate.
         else:
             scores *= conf  # conf = obj_conf * cls_conf
-        boxes @= self.convert_matrix
+        boxes[:, :, :4] @= self.convert_matrix
         max_score, category_id = scores.max(2, keepdim=True)
         dis = category_id.float() * self.max_wh
         nmsbox = boxes + dis
@@ -208,9 +208,9 @@ class ONNX_TRT(nn.Module):
         self.n_classes=n_classes
 
     def forward(self, x):
-        boxes = x[:, :, :4]
-        conf = x[:, :, 4:5]
-        scores = x[:, :, 5:]
+        boxes = x[:, :, :8]
+        conf = x[:, :, 8:9]
+        scores = x[:, :, 9:]
         if self.n_classes == 1:
             scores = conf # for models with one class, cls_loss is 0 and cls_conf is always 0.5,
                                  # so there is no need to multiplicate.
@@ -241,9 +241,6 @@ class End2End(nn.Module):
         return x
 
 
-
-
-
 def attempt_load(weights, map_location=None):
     # Loads an ensemble of models weights=[a,b,c] or a single model weights=[a] or weights=a
     model = Ensemble()
@@ -268,4 +265,3 @@ def attempt_load(weights, map_location=None):
         for k in ['names', 'stride']:
             setattr(model, k, getattr(model[-1], k))
         return model  # return ensemble
-
