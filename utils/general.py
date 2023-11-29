@@ -956,7 +956,7 @@ def apply_classifier(x, model, img, im0):
             scale_coords(img.shape[2:], d[:, :4], im0[i].shape)
 
             # Classes
-            pred_cls1 = d[:, 5].long()
+            pred_cls1 = d[:, 9].long()
             ims = []
             for j, a in enumerate(d):  # per item
                 cutout = im0[i][int(a[1]):int(a[3]), int(a[0]):int(a[2])]
