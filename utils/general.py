@@ -405,16 +405,23 @@ def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
         b1_x, b1_y, b1_w, b1_h = box1[0], box1[1], box1[2], box1[3]
         b2_x, b2_y, b2_w, b2_h = box2[0], box2[1], box2[2], box2[3]
 
+    var_x = varbox[0]
+    var_y = varbox[1]
+    var_w = varbox[2]
+    var_h = varbox[3]
+    
     b1_xy = torch.cat((b1_x, b1_y), dim=0)
     b1_wh = torch.cat((b1_w, b1_h), dim=0)
     b2_xy = torch.cat((b2_x, b2_y), dim=0)
     b2_wh = torch.cat((b2_w, b2_h), dim=0)
+    var_xy = torch.cat((var_x, var_y), dim=0)
+    var_wh = torch.cat((var_w, var_h), dim=0)
 
     def gaussian_dist_pdf(self, val, mean, var):
         return torch.exp(- (((val - mean) ** 2.0) / var) / 2.0) / torch.sqrt(2.0 * np.pi * var)
 
-    loss_xy = - torch.log(gaussian_dist_pdf(b1_xy, b2_xy, varbox[:2]) + 1e-9) / 2.0
-    loss_wh = - torch.log(gaussian_dist_pdf(b1_wh, b2_wh, varbox[2:4]) + 1e-9) / 2.0
+    loss_xy = - torch.log(gaussian_dist_pdf(b1_xy, b2_xy, var_xy) + 1e-9) / 2.0
+    loss_wh = - torch.log(gaussian_dist_pdf(b1_wh, b2_wh, var_wh) + 1e-9) / 2.0
 
     loss = loss_xy + loss_wh
     
