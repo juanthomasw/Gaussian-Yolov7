@@ -62,11 +62,11 @@ class Detect(nn.Module):
                     y[..., 8] *= (1.0 - sigma)
 
                     # unnormalize uncertainties
-                    sigma_xywh = torch.sqrt(sigma_xywh)
-                    sigma_xywh[..., :2] *= self.stride[i]
-                    sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
+                    # sigma_xywh = torch.sqrt(sigma_xywh)
+                    # sigma_xywh[..., :2] *= self.stride[i]
+                    # sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
 
-                    y[..., 4:8] = sigma_xywh
+                    # y[..., 4:8] = sigma_xywh
                     
                 else:
                     xy = y[..., 0:2]
@@ -82,9 +82,9 @@ class Detect(nn.Module):
                     c_obj *= (1.0 - sigma)
 
                     # unnormalize uncertainties
-                    sigma_xywh = torch.sqrt(sigma_xywh)
-                    sigma_xywh[..., :2] *= self.stride[i]
-                    sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
+                    # sigma_xywh = torch.sqrt(sigma_xywh)
+                    # sigma_xywh[..., :2] *= self.stride[i]
+                    # sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
                     
                     y = torch.cat((xy, wh, sigma_xywh, c_obj, c_cls), -1)
                     
@@ -167,11 +167,11 @@ class IDetect(nn.Module):
                 y[..., 8] *= (1.0 - sigma)
 
                 # unnormalize uncertainties
-                sigma_xywh = torch.sqrt(sigma_xywh)
-                sigma_xywh[..., :2] *= self.stride[i]
-                sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
+                # sigma_xywh = torch.sqrt(sigma_xywh)
+                # sigma_xywh[..., :2] *= self.stride[i]
+                # sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
 
-                y[..., 4:8] = sigma_xywh
+                # y[..., 4:8] = sigma_xywh
                 
                 z.append(y.view(bs, -1, self.no)) # flatten tensor along second dimension -> shape(ns, na*nx*ny, no)
 
@@ -200,11 +200,11 @@ class IDetect(nn.Module):
                     y[..., 8] *= (1.0 - sigma)
 
                     # unnormalize uncertainties
-                    sigma_xywh = torch.sqrt(sigma_xywh)
-                    sigma_xywh[..., :2] *= self.stride[i]
-                    sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
+                    # sigma_xywh = torch.sqrt(sigma_xywh)
+                    # sigma_xywh[..., :2] *= self.stride[i]
+                    # sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
 
-                    y[..., 4:8] = sigma_xywh
+                    # y[..., 4:8] = sigma_xywh
                 
                 else:
                     xy = y[..., 0:2]
@@ -220,9 +220,9 @@ class IDetect(nn.Module):
                     c_obj *= (1.0 - sigma)
 
                     # unnormalize uncertainties
-                    sigma_xywh = torch.sqrt(sigma_xywh)
-                    sigma_xywh[..., :2] *= self.stride[i]
-                    sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
+                    # sigma_xywh = torch.sqrt(sigma_xywh)
+                    # sigma_xywh[..., :2] *= self.stride[i]
+                    # sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
                     
                     y = torch.cat((xy, wh, sigma_xywh, c_obj, c_cls), -1)
                     
