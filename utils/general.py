@@ -386,7 +386,37 @@ def bbox_iou(box1, box2, x1y1x2y2=True, GIoU=False, DIoU=False, CIoU=False, eps=
     else:
         return iou  # IoU
 
+def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
+    box2 = box2.T
 
+    # Get the coordinates of bounding boxes
+    if x1y1x2y2:  # transform xyxy to xywh
+        b1_x = (box1[0] + box1[2]) / 2
+        b1_y = (box1[1] + box1[3]) / 2
+        b1_w = box1[2] - box1[0]
+        b1_h = box1[3] - box1[1]
+
+        b2_x = (box2[0] + box2[2]) / 2
+        b2_y = (box2[1] + box2[3]) / 2
+        b2_w = box2[2] - box2[0]
+        b2_h = box2[3] - box2[1]
+        
+    else:  # transform from xywh to xyxy
+        b1_x, b1_y, b1_w, b1_h = box1[0], box1[1], box1[2], box1[3]
+        b2_x, b2_y, b2_w, b2_h = box2[0], box2[1], box2[2], box2[3]
+
+    b1_xy, b1_wh = torch.cat(b1_x, b1_y), torch.cat(b1_w, b1_h)
+    b2_xy, b2_wh = torch.cat(b2_x, b2_y), torch.cat(b2_w, b2_h)
+
+    def gaussian_dist_pdf(self, val, mean, var):
+        return torch.exp(- (((val - mean) ** 2.0) / var) / 2.0) / torch.sqrt(2.0 * np.pi * var)
+
+    loss_xy = - torch.log(gaussian_dist_pdf(b1_xy, b2_xy, varbox[:2]) + 1e-9) / 2.0
+    loss_wh = - torch.log(gaussian_dist_pdf(b1_wh, b2_wh, varbox[2:4]) + 1e-9) / 2.0
+
+    loss = loss_xy + loss_wh
+    
+    return loss
 
 
 def bbox_alpha_iou(box1, box2, x1y1x2y2=False, GIoU=False, DIoU=False, CIoU=False, alpha=2, eps=1e-9):
