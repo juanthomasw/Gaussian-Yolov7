@@ -619,7 +619,7 @@ class ComputeLossOTA:
                 pvarbox = torch.cat((pvarxy, pvarwh), -1)
                 lnll = self.NLLbox(pbox.T, selected_tbox.T, pvarbox.T)
                 
-                lbox +=  lnll # iou loss # ((1.0 - iou).mean() + lnll)
+                lbox +=  (1.0 - iou).mean() # iou loss # ((1.0 - iou).mean() + lnll)
 
                 # Objectness
                 tobj[b, a, gj, gi] = (1.0 - self.gr) + self.gr * iou.detach().clamp(0).type(tobj.dtype)  # iou ratio
