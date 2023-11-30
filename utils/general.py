@@ -401,19 +401,16 @@ def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
 
     var_x, var_y, var_w, var_h = varbox[0], varbox[1], varbox[2], varbox[3]
 
-    b1_xy = torch.cat((b1_x, b1_y), dim=0)
-    b1_wh = torch.cat((b1_w, b1_h), dim=0)
-    b2_xy = torch.cat((b2_x, b2_y), dim=0)
-    b2_wh = torch.cat((b2_w, b2_h), dim=0)
-    var_xy = torch.cat((var_x, var_y), dim=0)
-    var_wh = torch.cat((var_w, var_h), dim=0)
+    loss_x = -torch.log(gaussian_dist_pdf(b1_x, b2_x, var_x) + 1e-9) / 2.0
+    loss_y = -torch.log(gaussian_dist_pdf(b1_y, b2_y, var_y) + 1e-9) / 2.0
+    loss_w = -torch.log(gaussian_dist_pdf(b1_w, b2_w, var_w) + 1e-9) / 2.0
+    loss_h = -torch.log(gaussian_dist_pdf(b1_h, b2_h, var_h) + 1e-9) / 2.0
 
-    loss_xy = -torch.log(gaussian_dist_pdf(b1_xy, b2_xy, var_xy) + 1e-9) / 2.0
-    loss_wh = -torch.log(gaussian_dist_pdf(b1_wh, b2_wh, var_wh) + 1e-9) / 2.0
+    loss = loss_x + loss_y + loss_w + loss_h
 
-    loss = loss_xy + loss_wh
+    average_loss = torch.mean(loss)  # Calculate the average of all losses
 
-    return loss
+    return average_loss
     
 def gaussian_dist_pdf(val, mean, var):
     return torch.exp(-(((val - mean) ** 2.0) / var) / 2.0) / torch.sqrt(2.0 * np.pi * var)
