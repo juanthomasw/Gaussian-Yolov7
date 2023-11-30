@@ -408,15 +408,15 @@ def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
     var_xy = torch.cat((var_x, var_y), dim=0)
     var_wh = torch.cat((var_w, var_h), dim=0)
 
-    def gaussian_dist_pdf(val, mean, var):
-        return torch.exp(- (((val - mean) ** 2.0) / var) / 2.0) / torch.sqrt(2.0 * np.pi * var)
-
     loss_xy = -torch.log(gaussian_dist_pdf(b1_xy, b2_xy, var_xy) + 1e-9) / 2.0
     loss_wh = -torch.log(gaussian_dist_pdf(b1_wh, b2_wh, var_wh) + 1e-9) / 2.0
 
     loss = loss_xy + loss_wh
 
     return loss
+    
+def gaussian_dist_pdf(val, mean, var):
+    return torch.exp(-(((val - mean) ** 2.0) / var) / 2.0) / torch.sqrt(2.0 * np.pi * var)
 
 def bbox_alpha_iou(box1, box2, x1y1x2y2=False, GIoU=False, DIoU=False, CIoU=False, alpha=2, eps=1e-9):
     # Returns tsqrt_he IoU of box1 to box2. box1 is 4, box2 is nx4
