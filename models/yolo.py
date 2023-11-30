@@ -74,7 +74,7 @@ class Detect(nn.Module):
                     sigma = sigma_xywh.mean(dim=-1)
                     c_obj *= (1.0 - sigma)
                     
-                    y = torch.cat((xy, wh, sigma_xywh, c_obj, c_cls), 4)
+                    y = torch.cat((xy, wh, sigma_xywh, c_obj, c_cls), -1)
                     
                 z.append(y.view(bs, -1, self.no))
 
@@ -193,7 +193,7 @@ class IDetect(nn.Module):
                     sigma = sigma_xywh.mean(dim=-1)
                     c_obj *= (1.0 - sigma)
                     
-                    y = torch.cat((xy, wh, sigma_xywh, c_obj, c_cls), 4)
+                    y = torch.cat((xy, wh, sigma_xywh, c_obj, c_cls), -1)
                     
                 z.append(y.view(bs, -1, no)) # flatten tensor along second dimension -> shape(ns, na*nx*ny, no)
 
@@ -239,7 +239,7 @@ class IDetect(nn.Module):
         convert_matrix = torch.tensor([[1, 0, 1, 0], [0, 1, 0, 1], [-0.5, 0, 0.5, 0], [0, -0.5, 0, 0.5]],
                                            dtype=torch.float32,
                                            device=z.device)
-        box[:,:,:4] @= convert_matrix                          
+        box[:, :, :4] @= convert_matrix                          
         return (box, score)
 
 
