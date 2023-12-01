@@ -986,7 +986,7 @@ def non_max_suppression_gaussian(prediction, conf_thres=0.25, iou_thres=0.45, cl
 
 def bbox_nll(box1, box2, varbox, wh_scale, x1y1x2y2=True):
     box2 = box2.T
-    wh_scale = wh_scale.T
+    wh_scale = wh_scale.permute(*torch.arange(x.ndim - 1, -1, -1))
 
     if x1y1x2y2:
         b1_x, b1_y, b1_w, b1_h = (box1[0] + box1[2]) / 2, (box1[1] + box1[3]) / 2, box1[2] - box1[0], box1[3] - box1[1]
