@@ -226,7 +226,7 @@ class IDetect(nn.Module):
                     
                     y = torch.cat((xy, wh, sigma_xywh, c_obj, c_cls), -1)
                     
-                z.append(y.view(bs, -1, no)) # flatten tensor along second dimension -> shape(ns, na*nx*ny, no)
+                z.append(y.view(bs, -1, self.no)) # flatten tensor along second dimension -> shape(ns, na*nx*ny, no)
 
         if self.training:
             out = x
