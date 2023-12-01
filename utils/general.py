@@ -1008,4 +1008,4 @@ def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
     return loss
     
 def gaussian_dist_pdf(mean, target, var):
-    return torch.exp(( -1.0 / 2.0) * (((target - mean) ** 2) / var)) / torch.sqrt(2.0 * np.pi * var)
+    return torch.exp((-1.0 / 2.0) * (((target - mean) ** 2) / var)) / torch.sqrt(2.0 * np.pi * var)
