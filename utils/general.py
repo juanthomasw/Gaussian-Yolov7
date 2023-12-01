@@ -1003,7 +1003,7 @@ def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
 
     tscale = 2.0 - box2[2] * box2[3]
     
-    loss = ((loss_x + loss_y + loss_w + loss_h) * tscale).mean() * 1e-2
+    loss = ((loss_x + loss_y + loss_w + loss_h) * tscale).mean()
 
     return loss
     
