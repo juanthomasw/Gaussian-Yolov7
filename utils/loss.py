@@ -456,6 +456,7 @@ class ComputeLoss:
         for i, pi in enumerate(p):  # layer index, layer predictions
             b, a, gj, gi = indices[i]  # image, anchor, gridy, gridx
             tobj = torch.zeros_like(pi[..., 0], device=device)  # target obj
+            tscale = torch.zeros_like(pi[..., 0], device=device)
 
             n = b.shape[0]  # number of targets
             if n:
@@ -467,10 +468,12 @@ class ComputeLoss:
                 pbox = torch.cat((pxy, pwh), -1)  # predicted box
                 iou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, CIoU=True)  # iou(prediction, target)
 
-                pvarxy = ps[:, 4:6].sigmoid()
-                pvarwh = ps[:, 6:8].sigmoid()
-                pvarbox = torch.cat((pvarxy, pvarwh), -1)
+                pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, x1y1x2y2=False)
+
+                tscale = tscale.T
+                tscale = 2.0 - tbox[i].T[2] * tbox[i].T[3]
+                lnll = (lnll * tscale).sum()
                 
                 lbox += lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
@@ -597,6 +600,7 @@ class ComputeLossOTA:
         for i, pi in enumerate(p):  # layer index, layer predictions
             b, a, gj, gi = bs[i], as_[i], gjs[i], gis[i]  # image, anchor, gridy, gridx
             tobj = torch.zeros_like(pi[..., 0], device=device)  # target obj
+            tscale = torch.zeros_like(pi[..., 0], device=device)
 
             n = b.shape[0]  # number of targets
             if n:
@@ -612,10 +616,12 @@ class ComputeLossOTA:
                 selected_tbox[:, :2] -= grid
                 iou = bbox_iou(pbox.T, selected_tbox, x1y1x2y2=False, CIoU=True)  # iou(prediction, target)
                 
-                pvarxy = ps[:, 4:6].sigmoid()
-                pvarwh = ps[:, 6:8].sigmoid()
-                pvarbox = torch.cat((pvarxy, pvarwh), -1)
+                pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, x1y1x2y2=False)
+
+                tscale = tscale.T
+                tscale = 2.0 - selected_tbox.T[2] * selected_tbox.T[3]
+                lnll = (lnll * tscale).sum()
                 
                 lbox +=  lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
