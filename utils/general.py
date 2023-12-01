@@ -986,7 +986,7 @@ def non_max_suppression_gaussian(prediction, conf_thres=0.25, iou_thres=0.45, cl
 
 def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
     box2 = box2.T
-    scale = box2[2] * box2[3]
+    scale = 2 - (box2[2] * box2[3])
 
     if x1y1x2y2:
         b1_x, b1_y, b1_w, b1_h = (box1[0] + box1[2]) / 2, (box1[1] + box1[3]) / 2, box1[2] - box1[0], box1[3] - box1[1]
