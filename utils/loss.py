@@ -469,7 +469,7 @@ class ComputeLoss:
 
                 original_wh = targets[i][:, 4:6]
                 pvarbox =  ps[:, 4:8].sigmoid()
-                lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, x1y1x2y2=False)
+                lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, original_wh.T, x1y1x2y2=False)
                 
                 lbox += lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
@@ -611,10 +611,10 @@ class ComputeLossOTA:
                 selected_tbox = targets[i][:, 2:6] * pre_gen_gains[i]
                 selected_tbox[:, :2] -= grid
                 iou = bbox_iou(pbox.T, selected_tbox, x1y1x2y2=False, CIoU=True)  # iou(prediction, target)
-                
-                pvarbox =  ps[:, 4:8].sigmoid()
+
                 original_wh = targets[i][:, 4:6]
-                lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, x1y1x2y2=False)
+                pvarbox =  ps[:, 4:8].sigmoid()
+                lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, original_wh.T, x1y1x2y2=False)
 
                 lbox +=  lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
