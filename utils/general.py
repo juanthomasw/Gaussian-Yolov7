@@ -984,7 +984,6 @@ def non_max_suppression_gaussian(prediction, conf_thres=0.25, iou_thres=0.45, cl
 
     return output
 
-
 def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
     box2 = box2.T
 
