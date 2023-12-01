@@ -469,7 +469,7 @@ class ComputeLoss:
 
                 original_wh = wh_original[i]
                 pvarbox =  ps[:, 4:8].sigmoid()
-                lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, original_wh.T, x1y1x2y2=False)
+                lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, original_wh, x1y1x2y2=False)
                 
                 lbox += lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
@@ -494,11 +494,12 @@ class ComputeLoss:
 
         if self.autobalance:
             self.balance = [x / self.balance[self.ssi] for x in self.balance]
-        lbox *= self.hyp['box']
+        #lbox *= self.hyp['box']
         lobj *= self.hyp['obj']
         lcls *= self.hyp['cls']
         bs = tobj.shape[0]  # batch size
 
+        print(f'lnll = {lbox}, lobj = {lobj}, lcls = {lcls}')
         loss = lbox + lobj + lcls
         return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
 
@@ -620,7 +621,7 @@ class ComputeLossOTA:
 
                 original_wh = targets[i][:, 4:6]
                 pvarbox =  ps[:, 4:8].sigmoid()
-                lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, original_wh.T, x1y1x2y2=False)
+                lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, original_wh, x1y1x2y2=False)
 
                 lbox +=  lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
@@ -645,11 +646,12 @@ class ComputeLossOTA:
 
         if self.autobalance:
             self.balance = [x / self.balance[self.ssi] for x in self.balance]
-        lbox *= self.hyp['box']
+        #lbox *= self.hyp['box']
         lobj *= self.hyp['obj']
         lcls *= self.hyp['cls']
         bs = tobj.shape[0]  # batch size
 
+        print(f'lnll = {lbox}, lobj = {lobj}, lcls = {lcls}')
         loss = lbox + lobj + lcls
         return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
 
