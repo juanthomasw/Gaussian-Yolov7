@@ -456,7 +456,6 @@ class ComputeLoss:
         for i, pi in enumerate(p):  # layer index, layer predictions
             b, a, gj, gi = indices[i]  # image, anchor, gridy, gridx
             tobj = torch.zeros_like(pi[..., 0], device=device)  # target obj
-            tscale = torch.zeros_like(pi[..., 0], device=device)
 
             n = b.shape[0]  # number of targets
             if n:
@@ -471,9 +470,7 @@ class ComputeLoss:
                 pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, x1y1x2y2=False)
 
-                tscale = tscale = tscale.permute(*range(len(tscale.shape)-1, -1, -1))
-                tscale = 2.0 - tbox[i].T[2] * tbox[i].T[3]
-                lnll = (lnll * tscale).sum()
+                lnll = lnll.sum() # lnll = (lnll * tscale).sum()
                 
                 lbox += lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
@@ -600,7 +597,6 @@ class ComputeLossOTA:
         for i, pi in enumerate(p):  # layer index, layer predictions
             b, a, gj, gi = bs[i], as_[i], gjs[i], gis[i]  # image, anchor, gridy, gridx
             tobj = torch.zeros_like(pi[..., 0], device=device)  # target obj
-            tscale = torch.zeros_like(pi[..., 0], device=device)
 
             n = b.shape[0]  # number of targets
             if n:
@@ -619,9 +615,7 @@ class ComputeLossOTA:
                 pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, x1y1x2y2=False)
 
-                tscale = tscale = tscale.permute(*range(len(tscale.shape)-1, -1, -1))
-                tscale = 2.0 - selected_tbox.T[2] * selected_tbox.T[3]
-                lnll = (lnll * tscale).sum()
+                lnll = lnll.sum # lnll = (lnll * tscale).sum()
                 
                 lbox +=  lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
