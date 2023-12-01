@@ -386,32 +386,6 @@ def bbox_iou(box1, box2, x1y1x2y2=True, GIoU=False, DIoU=False, CIoU=False, eps=
     else:
         return iou  # IoU
 
-def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
-    box2 = box2.T
-
-    if x1y1x2y2:
-        b1_x, b1_y, b1_w, b1_h = (box1[0] + box1[2]) / 2, (box1[1] + box1[3]) / 2, box1[2] - box1[0], box1[3] - box1[1]
-        b2_x, b2_y, b2_w, b2_h = (box2[0] + box2[2]) / 2, (box2[1] + box2[3]) / 2, box2[2] - box2[0], box2[3] - box2[1]
-    else:
-        b1_x, b1_y, b1_w, b1_h = box1[0], box1[1], box1[2], box1[3]
-        b2_x, b2_y, b2_w, b2_h = box2[0], box2[1], box2[2], box2[3]
-
-    sigma_x, sigma_y, sigma_w, sigma_h = varbox[0], varbox[1], varbox[2], varbox[3]
-
-    loss_x = -torch.log(gaussian_dist_pdf(b1_x, b2_x, sigma_x) + 1e-9) / 2.0
-    loss_y = -torch.log(gaussian_dist_pdf(b1_y, b2_y, sigma_y) + 1e-9) / 2.0
-    loss_w = -torch.log(gaussian_dist_pdf(b1_w, b2_w, sigma_w) + 1e-9) / 2.0
-    loss_h = -torch.log(gaussian_dist_pdf(b1_h, b2_h, sigma_h) + 1e-9) / 2.0
-
-    loss = (loss_x + loss_y + loss_w + loss_h)/4
-
-    average_loss = torch.mean(loss)  # Calculate the average of all losses
-
-    return average_loss
-    
-def gaussian_dist_pdf(mean, target, sigma):
-    return torch.exp(( -1.0 / 2.0) * (((target - mean) / sigma) ** 2)) / (torch.sqrt(2.0 * np.pi) * sigma)
-
 def bbox_alpha_iou(box1, box2, x1y1x2y2=False, GIoU=False, DIoU=False, CIoU=False, alpha=2, eps=1e-9):
     # Returns tsqrt_he IoU of box1 to box2. box1 is 4, box2 is nx4
     box2 = box2.T
@@ -1008,3 +982,29 @@ def increment_path(path, exist_ok=True, sep=''):
         i = [int(m.groups()[0]) for m in matches if m]  # indices
         n = max(i) + 1 if i else 2  # increment number
         return f"{path}{sep}{n}"  # update path
+
+def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
+    box2 = box2.T
+
+    if x1y1x2y2:
+        b1_x, b1_y, b1_w, b1_h = (box1[0] + box1[2]) / 2, (box1[1] + box1[3]) / 2, box1[2] - box1[0], box1[3] - box1[1]
+        b2_x, b2_y, b2_w, b2_h = (box2[0] + box2[2]) / 2, (box2[1] + box2[3]) / 2, box2[2] - box2[0], box2[3] - box2[1]
+    else:
+        b1_x, b1_y, b1_w, b1_h = box1[0], box1[1], box1[2], box1[3]
+        b2_x, b2_y, b2_w, b2_h = box2[0], box2[1], box2[2], box2[3]
+
+    sigma_x, sigma_y, sigma_w, sigma_h = varbox[0], varbox[1], varbox[2], varbox[3]
+
+    loss_x = -torch.log(gaussian_dist_pdf(b1_x, b2_x, sigma_x) + 1e-9) / 2.0
+    loss_y = -torch.log(gaussian_dist_pdf(b1_y, b2_y, sigma_y) + 1e-9) / 2.0
+    loss_w = -torch.log(gaussian_dist_pdf(b1_w, b2_w, sigma_w) + 1e-9) / 2.0
+    loss_h = -torch.log(gaussian_dist_pdf(b1_h, b2_h, sigma_h) + 1e-9) / 2.0
+
+    loss = (loss_x + loss_y + loss_w + loss_h)/4
+
+    average_loss = torch.mean(loss)  # Calculate the average of all losses
+
+    return average_loss
+    
+def gaussian_dist_pdf(mean, target, sigma):
+    return torch.exp(( -1.0 / 2.0) * (((target - mean) / sigma) ** 2)) / (torch.sqrt(2.0 * np.pi) * sigma)
