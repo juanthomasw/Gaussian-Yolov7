@@ -450,7 +450,7 @@ class ComputeLoss:
     def __call__(self, p, targets):  # predictions, targets, model
         device = targets.device
         lcls, lbox, lobj = torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device)
-        tcls, tbox, indices, anchors = self.build_targets(p, targets)  # targets
+        tcls, tbox, indices, anchors, wh_original = self.build_targets(p, targets)  # targets
 
         # Losses
         for i, pi in enumerate(p):  # layer index, layer predictions
@@ -467,7 +467,7 @@ class ComputeLoss:
                 pbox = torch.cat((pxy, pwh), -1)  # predicted box
                 iou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, CIoU=True)  # iou(prediction, target)
 
-                original_wh = targets[i][:, 4:6]
+                original_wh = wh_original[i]
                 pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, original_wh.T, x1y1x2y2=False)
                 
@@ -523,6 +523,7 @@ class ComputeLoss:
 
             # Match targets to anchors
             t = targets * gain
+            t_original = targets
             
             if nt:
                 # Matches
@@ -530,6 +531,7 @@ class ComputeLoss:
                 j = torch.max(r, 1. / r).max(2)[0] < self.hyp['anchor_t']  # compare
                 # j = wh_iou(anchors, t[:, 4:6]) > model.hyp['iou_t']  # iou(3,n)=wh_iou(anchors(3,2), gwh(n,2))
                 t = t[j]  # filter
+                t_original = t_original[j]
 
                 # Offsets
                 gxy = t[:, 2:4]  # grid xy
@@ -538,9 +540,11 @@ class ComputeLoss:
                 l, m = ((gxi % 1. < g) & (gxi > 1.)).T
                 j = torch.stack((torch.ones_like(j), j, k, l, m))
                 t = t.repeat((5, 1, 1))[j]
+                t_original  t_original.repeat((5, 1, 1))[j]
                 offsets = (torch.zeros_like(gxy)[None] + off[:, None])[j]
             else:
                 t = targets[0]
+                t_original = targets[0]
                 offsets = 0
 
             # Define
@@ -549,6 +553,8 @@ class ComputeLoss:
             gwh = t[:, 4:6]  # grid wh
             gij = (gxy - offsets).long()
             gi, gj = gij.T  # grid xy indices
+
+            wh_original = t_original[:, 4:6]
             
             # Append
             a = t[:, 6].long()  # anchor indices
@@ -557,7 +563,7 @@ class ComputeLoss:
             anch.append(anchors[a])  # anchors
             tcls.append(c)  # class
 
-        return tcls, tbox, indices, anch
+        return tcls, tbox, indices, anch, wh_original
 
 
 class ComputeLossOTA:
