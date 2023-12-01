@@ -471,7 +471,7 @@ class ComputeLoss:
                 pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, x1y1x2y2=False)
 
-                tscale = tscale.T
+                tscale = tscale = tscale.permute(*range(len(tscale.shape)-1, -1, -1))
                 tscale = 2.0 - tbox[i].T[2] * tbox[i].T[3]
                 lnll = (lnll * tscale).sum()
                 
@@ -619,7 +619,7 @@ class ComputeLossOTA:
                 pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, x1y1x2y2=False)
 
-                tscale = tscale.T
+                tscale = tscale = tscale.permute(*range(len(tscale.shape)-1, -1, -1))
                 tscale = 2.0 - selected_tbox.T[2] * selected_tbox.T[3]
                 lnll = (lnll * tscale).sum()
                 
