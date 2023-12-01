@@ -467,6 +467,7 @@ class ComputeLoss:
                 pbox = torch.cat((pxy, pwh), -1)  # predicted box
                 iou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, CIoU=True)  # iou(prediction, target)
 
+                original_wh = targets[i][:, 4:6]
                 pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, x1y1x2y2=False)
                 
@@ -522,6 +523,7 @@ class ComputeLoss:
 
             # Match targets to anchors
             t = targets * gain
+            
             if nt:
                 # Matches
                 r = t[:, :, 4:6] / anchors[:, None]  # wh ratio
@@ -547,7 +549,7 @@ class ComputeLoss:
             gwh = t[:, 4:6]  # grid wh
             gij = (gxy - offsets).long()
             gi, gj = gij.T  # grid xy indices
-
+            
             # Append
             a = t[:, 6].long()  # anchor indices
             indices.append((b, a, gj.clamp_(0, gain[3] - 1), gi.clamp_(0, gain[2] - 1)))  # image, anchor, grid indices
@@ -611,8 +613,9 @@ class ComputeLossOTA:
                 iou = bbox_iou(pbox.T, selected_tbox, x1y1x2y2=False, CIoU=True)  # iou(prediction, target)
                 
                 pvarbox =  ps[:, 4:8].sigmoid()
+                original_wh = targets[i][:, 4:6]
                 lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, x1y1x2y2=False)
-                
+
                 lbox +=  lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
                 # Objectness
