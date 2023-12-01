@@ -499,7 +499,7 @@ class ComputeLoss:
         lcls *= self.hyp['cls']
         bs = tobj.shape[0]  # batch size
 
-        print(f'lnll = {lbox}, lobj = {lobj}, lcls = {lcls}')
+        #print(f'lnll = {lbox}, lobj = {lobj}, lcls = {lcls}')
         loss = lbox + lobj + lcls
         return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
 
@@ -651,7 +651,7 @@ class ComputeLossOTA:
         lcls *= self.hyp['cls']
         bs = tobj.shape[0]  # batch size
 
-        print(f'lnll = {lbox}, lobj = {lobj}, lcls = {lcls}')
+        #print(f'lnll = {lbox}, lobj = {lobj}, lcls = {lcls}')
         loss = lbox + lobj + lcls
         return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
 
