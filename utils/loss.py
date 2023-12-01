@@ -450,7 +450,7 @@ class ComputeLoss:
     def __call__(self, p, targets):  # predictions, targets, model
         device = targets.device
         lcls, lbox, lobj = torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device)
-        tcls, tbox, indices, anchors, wh_original = self.build_targets(p, targets)  # targets
+        tcls, tbox, indices, anchors, twh = self.build_targets(p, targets)  # targets
 
         # Losses
         for i, pi in enumerate(p):  # layer index, layer predictions
@@ -467,9 +467,8 @@ class ComputeLoss:
                 pbox = torch.cat((pxy, pwh), -1)  # predicted box
                 iou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, CIoU=True)  # iou(prediction, target)
 
-                original_wh = wh_original[i]
                 pvarbox =  ps[:, 4:8].sigmoid()
-                lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, original_wh, x1y1x2y2=False)
+                lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, twh[i], x1y1x2y2=False)
                 
                 lbox += lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
@@ -507,7 +506,7 @@ class ComputeLoss:
     def build_targets(self, p, targets):
         # Build targets for compute_loss(), input targets(image,class,x,y,w,h)
         na, nt = self.na, targets.shape[0]  # number of anchors, targets
-        tcls, tbox, indices, anch = [], [], [], []
+        tcls, tbox, indices, anch, twh = [], [], [], [], []
         gain = torch.ones(7, device=targets.device).long()  # normalized to gridspace gain
         ai = torch.arange(na, device=targets.device).float().view(na, 1).repeat(1, nt)  # same as .repeat_interleave(nt)
         targets = torch.cat((targets.repeat(na, 1, 1), ai[:, :, None]), 2)  # append anchor indices
@@ -561,6 +560,7 @@ class ComputeLoss:
             a = t[:, 6].long()  # anchor indices
             indices.append((b, a, gj.clamp_(0, gain[3] - 1), gi.clamp_(0, gain[2] - 1)))  # image, anchor, grid indices
             tbox.append(torch.cat((gxy - gij, gwh), 1))  # box
+            twh.append(wh_original)
             anch.append(anchors[a])  # anchors
             tcls.append(c)  # class
 
