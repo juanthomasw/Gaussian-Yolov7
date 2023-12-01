@@ -472,7 +472,7 @@ class ComputeLoss:
 
                 lnll = lnll.sum() # lnll = (lnll * tscale).sum()
                 
-                lbox += lnll # iou loss - ((1.0 - iou).mean() + lnll)
+                lbox += (1.0 - iou).mean() # iou loss - ((1.0 - iou).mean() + lnll)
 
                 # Objectness
                 tobj[b, a, gj, gi] = (1.0 - self.gr) + self.gr * iou.detach().clamp(0).type(tobj.dtype)  # iou ratio
@@ -617,7 +617,7 @@ class ComputeLossOTA:
 
                 lnll = lnll.sum # lnll = (lnll * tscale).sum()
                 
-                lbox +=  lnll # iou loss - ((1.0 - iou).mean() + lnll)
+                lbox +=  (1.0 - iou).mean() # iou loss - ((1.0 - iou).mean() + lnll)
 
                 # Objectness
                 tobj[b, a, gj, gi] = (1.0 - self.gr) + self.gr * iou.detach().clamp(0).type(tobj.dtype)  # iou ratio
