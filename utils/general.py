@@ -996,10 +996,10 @@ def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
 
     var_x, var_y, var_w, var_h = varbox[0], varbox[1], varbox[2], varbox[3]
     
-    loss_x = -torch.log(gaussian_dist_pdf(b1_x, b2_x, var_x) + 1e-9) / 2.0
-    loss_y = -torch.log(gaussian_dist_pdf(b1_y, b2_y, var_y) + 1e-9) / 2.0
-    loss_w = -torch.log(gaussian_dist_pdf(b1_w, b2_w, var_w) + 1e-9) / 2.0
-    loss_h = -torch.log(gaussian_dist_pdf(b1_h, b2_h, var_h) + 1e-9) / 2.0
+    loss_x = torch.log(gaussian_dist_pdf(b1_x, b2_x, var_x) + 1e-9) / 2.0
+    loss_y = torch.log(gaussian_dist_pdf(b1_y, b2_y, var_y) + 1e-9) / 2.0
+    loss_w = torch.log(gaussian_dist_pdf(b1_w, b2_w, var_w) + 1e-9) / 2.0
+    loss_h = torch.log(gaussian_dist_pdf(b1_h, b2_h, var_h) + 1e-9) / 2.0
 
     tscale = 2.0 - box2[2] * box2[3]
     
