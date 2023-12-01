@@ -986,7 +986,6 @@ def non_max_suppression_gaussian(prediction, conf_thres=0.25, iou_thres=0.45, cl
 
 def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
     box2 = box2.T
-    scale = 2 - (box2[2] * box2[3])
 
     if x1y1x2y2:
         b1_x, b1_y, b1_w, b1_h = (box1[0] + box1[2]) / 2, (box1[1] + box1[3]) / 2, box1[2] - box1[0], box1[3] - box1[1]
@@ -1002,14 +1001,7 @@ def bbox_nll(box1, box2, varbox, x1y1x2y2=True):
     loss_w = -torch.log(gaussian_dist_pdf(b1_w, b2_w, var_w) + 1e-9) / 2.0
     loss_h = -torch.log(gaussian_dist_pdf(b1_h, b2_h, var_h) + 1e-9) / 2.0
 
-    loss_x = (loss_x * scale).sum()
-    loss_y = (loss_y * scale).sum()
-    loss_w = (loss_w * scale).sum()
-    loss_h = (loss_h * scale).sum()
-
     loss = loss_x + loss_y + loss_w + loss_h
-
-    #average_loss = torch.mean(loss)  # Calculate the average of all losses
 
     return loss
     
