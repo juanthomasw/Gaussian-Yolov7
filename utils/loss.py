@@ -470,7 +470,7 @@ class ComputeLoss:
                 pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, twh[i], x1y1x2y2=False)
                 
-                lbox += lnll # iou loss - ((1.0 - iou).mean() + lnll)
+                lbox += (1.0 - iou).mean() # iou loss - ((1.0 - iou).mean() + lnll)
 
                 # Objectness
                 tobj[b, a, gj, gi] = (1.0 - self.gr) + self.gr * iou.detach().clamp(0).type(tobj.dtype)  # iou ratio
@@ -493,12 +493,13 @@ class ComputeLoss:
 
         if self.autobalance:
             self.balance = [x / self.balance[self.ssi] for x in self.balance]
-        #lbox *= self.hyp['box']
+        lbox *= self.hyp['box']
         lobj *= self.hyp['obj']
         lcls *= self.hyp['cls']
         bs = tobj.shape[0]  # batch size
 
-        #print(f'lnll = {lbox}, lobj = {lobj}, lcls = {lcls}')
+        print(f'lbox = {lbox}, lobj = {lobj}, lcls = {lcls}')
+        
         loss = lbox + lobj + lcls
         return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
 
@@ -625,7 +626,7 @@ class ComputeLossOTA:
                 pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, original_wh, x1y1x2y2=False)
 
-                lbox +=  lnll # iou loss - ((1.0 - iou).mean() + lnll)
+                lbox +=  (1.0 - iou).mean() # iou loss - ((1.0 - iou).mean() + lnll)
 
                 # Objectness
                 tobj[b, a, gj, gi] = (1.0 - self.gr) + self.gr * iou.detach().clamp(0).type(tobj.dtype)  # iou ratio
@@ -648,12 +649,13 @@ class ComputeLossOTA:
 
         if self.autobalance:
             self.balance = [x / self.balance[self.ssi] for x in self.balance]
-        #lbox *= self.hyp['box']
+        lbox *= self.hyp['box']
         lobj *= self.hyp['obj']
         lcls *= self.hyp['cls']
         bs = tobj.shape[0]  # batch size
 
-        #print(f'lnll = {lbox}, lobj = {lobj}, lcls = {lcls}')
+        print(f'lbox = {lbox}, lobj = {lobj}, lcls = {lcls}')
+        
         loss = lbox + lobj + lcls
         return loss * bs, torch.cat((lbox, lobj, lcls, loss)).detach()
 
