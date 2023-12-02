@@ -994,7 +994,7 @@ def bbox_nll(box1, box2, varbox, wh_scale, x1y1x2y2=True):
     wh_scale = wh_scale.T
     tscale = 2.0 - wh_scale[0] * wh_scale[1]
 
-    # print(f'whscale:{wh_scale')
+    # print(f'whscale:{wh_scale}')
     # print(f'tscale:{tscale}, wscale: {wh_scale[0]}, hscale: {wh_scale[1]}')
     
     if x1y1x2y2:
