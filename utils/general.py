@@ -986,6 +986,11 @@ def non_max_suppression_gaussian(prediction, conf_thres=0.25, iou_thres=0.45, cl
 
 def bbox_nll(box1, box2, varbox, wh_scale, x1y1x2y2=True):
     box2 = box2.T
+
+    # Check if wh_scale has only 1 dimension and add an extra dimension if needed
+    if len(wh_scale.shape) == 1:
+        wh_scale = wh_scale.unsqueeze(0)
+    
     wh_scale = wh_scale.T
     tscale = 2.0 - wh_scale[0] * wh_scale[1]
 
