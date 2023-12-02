@@ -987,7 +987,11 @@ def non_max_suppression_gaussian(prediction, conf_thres=0.25, iou_thres=0.45, cl
 def bbox_nll(box1, box2, varbox, wh_scale, x1y1x2y2=True):
     box2 = box2.T
     wh_scale = wh_scale.T
+    tscale = 2.0 - wh_scale[0] * wh_scale[1]
 
+    # print(f'whscale:{wh_scale[:,:2]}')
+    # print(f'tscale:{tscale[:2]}, wscale: {wh_scale[0,:2]}, hscale: {wh_scale[1,:2]}')
+    
     if x1y1x2y2:
         b1_x, b1_y, b1_w, b1_h = (box1[0] + box1[2]) / 2, (box1[1] + box1[3]) / 2, box1[2] - box1[0], box1[3] - box1[1]
         b2_x, b2_y, b2_w, b2_h = (box2[0] + box2[2]) / 2, (box2[1] + box2[3]) / 2, box2[2] - box2[0], box2[3] - box2[1]
@@ -1002,11 +1006,10 @@ def bbox_nll(box1, box2, varbox, wh_scale, x1y1x2y2=True):
     loss_w = -torch.log(gaussian_dist_pdf(b1_w, b2_w, var_w) + 1e-9) / 2.0
     loss_h = -torch.log(gaussian_dist_pdf(b1_h, b2_h, var_h) + 1e-9) / 2.0
 
-    tscale = 2.0 - wh_scale[0] * wh_scale[1]
+    
     
     loss = ((loss_x + loss_y + loss_w + loss_h) * tscale).mean()
 
-    print(f'tscale:{tscale[:2]}, wscale: {wh_scale[0,:2]}, hscale: {wh_scale[1,:2]}')
     #print(f'NLLloss:{loss}')
     
     return loss
