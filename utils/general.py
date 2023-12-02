@@ -1005,12 +1005,10 @@ def bbox_nll(box1, box2, varbox, wh_scale, x1y1x2y2=True):
     loss_y = -torch.log(gaussian_dist_pdf(b1_y, b2_y, var_y) + 1e-9) / 2.0
     loss_w = -torch.log(gaussian_dist_pdf(b1_w, b2_w, var_w) + 1e-9) / 2.0
     loss_h = -torch.log(gaussian_dist_pdf(b1_h, b2_h, var_h) + 1e-9) / 2.0
-
-    
     
     loss = ((loss_x + loss_y + loss_w + loss_h) * tscale).mean()
 
-    #print(f'NLLloss:{loss}')
+    # print(f'NLLloss:{loss}')
     
     return loss
     
