@@ -521,11 +521,11 @@ class ComputeLoss:
             anchors = self.anchors[i]
             gain[2:6] = torch.tensor(p[i].shape)[[3, 2, 3, 2]]  # xyxy gain
 
-            gain_2 = torch.ones_like(gain)
+            gain2 = torch.ones_like(gain)
 
             # Match targets to anchors
             t = targets * gain
-            t_original = targets * gain
+            t_original = targets * gain2
             
             if nt:
                 # Matches
