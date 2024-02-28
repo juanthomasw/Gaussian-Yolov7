@@ -468,7 +468,7 @@ class ComputeLoss:
                 iou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, CIoU=True)  # iou(prediction, target)
 
                 pvarbox =  ps[:, 4:8].sigmoid()
-                lnll = 1e-2 * bbox_nll(pbox.T, tbox[i], pvarbox.T, twh[i], x1y1x2y2=False)
+                lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, twh[i], x1y1x2y2=False)
                 
                 lbox += lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
@@ -624,7 +624,7 @@ class ComputeLossOTA:
 
                 original_wh = targets[i][:, 4:6]
                 pvarbox =  ps[:, 4:8].sigmoid()
-                lnll = 1e-2 * bbox_nll(pbox.T, selected_tbox, pvarbox.T, original_wh, x1y1x2y2=False)
+                lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, original_wh, x1y1x2y2=False)
 
                 lbox +=  lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
