@@ -450,7 +450,7 @@ class ComputeLoss:
     def __call__(self, p, targets):  # predictions, targets, model
         device = targets.device
         lcls, lbox, lobj = torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device)
-        tcls, tbox, indices, anchors, twh = self.build_targets(p, targets)  # targets
+        tcls, tbox, indices, anchors = self.build_targets(p, targets)  # targets
 
         # Losses
         for i, pi in enumerate(p):  # layer index, layer predictions
@@ -466,7 +466,7 @@ class ComputeLoss:
                 pwh = (ps[:, 2:4].sigmoid() * 2) ** 2 * anchors[i]
                 pbox = torch.cat((pxy, pwh), -1)  # predicted box
                 # iou = bbox_iou(pbox.T, tbox[i], x1y1x2y2=False, CIoU=True)  # iou(prediction, target)
-
+                
                 pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, twh[i], x1y1x2y2=False)
                 
@@ -525,7 +525,7 @@ class ComputeLoss:
             # Match targets to anchors
             t = targets * gain
 
-            wh = targets[:, :, 4:6]
+            wh = targets[:, 4:6]
             
             if nt:
                 # Matches
@@ -616,9 +616,9 @@ class ComputeLossOTA:
                 selected_tbox[:, :2] -= grid
                 iou = bbox_iou(pbox.T, selected_tbox, x1y1x2y2=False, CIoU=True)  # iou(prediction, target)
 
-                original_wh = targets[i][:, 4:6]
+                twh = targets[i][:, 4:6]
                 pvarbox =  ps[:, 4:8].sigmoid()
-                lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, original_wh, x1y1x2y2=False)
+                lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, twh, x1y1x2y2=False)
 
                 lbox +=  lnll # iou loss - ((1.0 - iou).mean() + lnll)
 
