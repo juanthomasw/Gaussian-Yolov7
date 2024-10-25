@@ -110,7 +110,7 @@ class IDetect(nn.Module):
     include_nms = False
     concat = False
 
-    def __init__(self, nc=80, anchors=(), ch=(), gaussian=False):  # detection layer
+    def __init__(self, nc=80, anchors=(), ch=()):  # detection layer
         super(IDetect, self).__init__()
         self.nc = nc  # number of classes -> nc=1
         self.no = nc + 9  # number of outputs per anchor with xywh uncertainties
