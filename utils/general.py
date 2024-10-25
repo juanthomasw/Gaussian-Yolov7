@@ -987,8 +987,8 @@ def non_max_suppression_gaussian(prediction, conf_thres=0.25, iou_thres=0.45, cl
 def bbox_nll(box1, box2, varbox, wh_scale, x1y1x2y2=True):
     box2 = box2.T
     
-    # wh_scale = wh_scale.T
-    # tscale = 2.0 - wh_scale[0] * wh_scale[1]
+    wh_scale = wh_scale.T
+    tscale = 2.0 - wh_scale[0] * wh_scale[1]
 
     # print(f'whscale:{wh_scale}')
     # print(f'wscale:{wh_scale[0]},\n\nhscale:{wh_scale[1]},\n\npred: {box1.T},\n\nvar: {varbox.T}, \n\ntgt: {box2.T}\n\n')
@@ -1009,8 +1009,8 @@ def bbox_nll(box1, box2, varbox, wh_scale, x1y1x2y2=True):
     
     # print(f'Loss_x:{loss_x}\nLoss_y:{loss_y}\nLoss_x:{loss_w}\nLoss_w:{loss_h}\n')
 
-    # loss = 1e-2 * ((loss_x + loss_y + loss_w + loss_h) * tscale).mean()
-    loss = (loss_x + loss_y + loss_w + loss_h).mean()
+    loss = 1e-2 * ((loss_x + loss_y + loss_w + loss_h) * tscale).mean()
+    # loss = (loss_x + loss_y + loss_w + loss_h).mean()
 
     # Ensure that the loss is non-negative
     # loss = torch.clamp(loss, min=0.0)
