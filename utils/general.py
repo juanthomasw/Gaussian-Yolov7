@@ -931,20 +931,20 @@ def non_max_suppression_gaussian(prediction, conf_thres=0.25, iou_thres=0.45, cl
 
         # Compute conf
         if nc == 1:
-            x[:, 5:] = x[:, 4:5] # for models with one class, cls_loss is 0 and cls_conf is always 0.5,
+            x[:, 9:] = x[:, 8:9] # for models with one class, cls_loss is 0 and cls_conf is always 0.5,
                                  # so there is no need to multiplicate.
         else:
-            x[:, 5:] *= x[:, 4:5]  # conf = obj_conf * cls_conf
+            x[:, 9:] *= x[:, 8:9]  # conf = obj_conf * cls_conf
 
         # Box (center x, center y, width, height) to (x1, y1, x2, y2)
         box = xywh2xyxy(x[:, :4])
 
-        # Detections matrix nx6 (xyxy, conf, cls)
+        # Detections matrix nx6 (xyxy conf, cls)
         if multi_label:
-            i, j = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
-            x = torch.cat((box[i], x[i, j + 5, None], j[:, None].float()), 1)
+            i, j = (x[:, 9:] > conf_thres).nonzero(as_tuple=False).T
+            x = torch.cat((box[i], x[i, j + 9, None], j[:, None].float()), 1)
         else:  # best class only
-            conf, j = x[:, 5:].max(1, keepdim=True)
+            conf, j = x[:, 9:].max(1, keepdim=True)
             x = torch.cat((box, conf, j.float()), 1)[conf.view(-1) > conf_thres]
 
         # Filter by class
