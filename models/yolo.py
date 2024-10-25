@@ -65,7 +65,7 @@ class Detect(nn.Module):
                     wh = y[..., 2:4] ** 2 * (4 * self.anchor_grid[i].data)  # new wh
 
                     sigma = y[..., 4:8].mean(dim=-1)
-                    y[...,8] *= (1.0 - sigma)
+                    y[..., 8] *= (1.0 - sigma)
                     
                     y = torch.cat((xy, wh, y[..., 4:]), -1)
                     
@@ -144,7 +144,7 @@ class IDetect(nn.Module):
                 y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh compensation term
 
                 sigma = y[..., 4:8].mean(dim=-1)
-                y[...,8] *= (1.0 - sigma)
+                y[..., 8] *= (1.0 - sigma)
                 
                 z.append(y.view(bs, -1, self.no)) # flatten tensor along second dimension -> shape(ns, na*nx*ny, no)
 
@@ -169,14 +169,14 @@ class IDetect(nn.Module):
                     y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh
 
                     sigma = y[..., 4:8].mean(dim=-1)
-                    y[...,8] *= (1.0 - sigma)
+                    y[..., 8] *= (1.0 - sigma)
                 
                 else:
                     xy = y[..., 0:2] * (2. * self.stride[i]) + (self.stride[i] * (self.grid[i] - 0.5))  # new xy
                     wh = y[..., 2:4] ** 2 * (4 * self.anchor_grid[i].data)  # new wh
 
                     sigma = y[..., 4:8].mean(dim=-1)
-                    y[...,8] *= (1.0 - sigma)
+                    y[..., 8] *= (1.0 - sigma)
                     
                     y = torch.cat((xy, wh, y[..., 4:]), -1)
                     
