@@ -522,11 +522,10 @@ class ComputeLoss:
             anchors = self.anchors[i]
             gain[2:6] = torch.tensor(p[i].shape)[[3, 2, 3, 2]]  # xyxy gain
 
-            gain2 = torch.ones_like(gain)
-
             # Match targets to anchors
             t = targets * gain
-            t_original = targets * gain2
+
+            wh = targets[:, :, 4:6]
             
             if nt:
                 # Matches
@@ -534,7 +533,6 @@ class ComputeLoss:
                 j = torch.max(r, 1. / r).max(2)[0] < self.hyp['anchor_t']  # compare
                 # j = wh_iou(anchors, t[:, 4:6]) > model.hyp['iou_t']  # iou(3,n)=wh_iou(anchors(3,2), gwh(n,2))
                 t = t[j]  # filter
-                t_original = t_original[j]
 
                 # Offsets
                 gxy = t[:, 2:4]  # grid xy
@@ -543,11 +541,9 @@ class ComputeLoss:
                 l, m = ((gxi % 1. < g) & (gxi > 1.)).T
                 j = torch.stack((torch.ones_like(j), j, k, l, m))
                 t = t.repeat((5, 1, 1))[j]
-                t_original = t_original.repeat((5, 1, 1))[j]
                 offsets = (torch.zeros_like(gxy)[None] + off[:, None])[j]
             else:
                 t = targets[0]
-                t_original = targets[0]
                 offsets = 0
 
             # Define
@@ -556,18 +552,16 @@ class ComputeLoss:
             gwh = t[:, 4:6]  # grid wh
             gij = (gxy - offsets).long()
             gi, gj = gij.T  # grid xy indices
-
-            wh_original = t_original[:, 4:6]
             
             # Append
             a = t[:, 6].long()  # anchor indices
             indices.append((b, a, gj.clamp_(0, gain[3] - 1), gi.clamp_(0, gain[2] - 1)))  # image, anchor, grid indices
             tbox.append(torch.cat((gxy - gij, gwh), 1))  # box
-            twh.append(wh_original)
+            twh.append(wh)
             anch.append(anchors[a])  # anchors
             tcls.append(c)  # class
 
-        return tcls, tbox, indices, anch, wh_original
+        return tcls, tbox, indices, anch, twh
 
 
 class ComputeLossOTA:
