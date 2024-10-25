@@ -986,16 +986,12 @@ def non_max_suppression_gaussian(prediction, conf_thres=0.25, iou_thres=0.45, cl
 
 def bbox_nll(box1, box2, varbox, wh_scale, x1y1x2y2=True):
     box2 = box2.T
-
-    # Check if wh_scale has only 1 dimension and add an extra dimension if needed
-    if len(wh_scale.shape) == 1:
-        wh_scale = wh_scale.unsqueeze(0)
     
-    wh_scale = wh_scale.T
-    tscale = 2.0 - wh_scale[0] * wh_scale[1]
+    # wh_scale = wh_scale.T
+    # tscale = 2.0 - wh_scale[0] * wh_scale[1]
 
     # print(f'whscale:{wh_scale}')
-    # print(f'tscale:{tscale}, wscale: {wh_scale[0]}, hscale: {wh_scale[1]}')
+    # print(f'wscale:{wh_scale[0]},\n\nhscale:{wh_scale[1]},\n\npred: {box1.T},\n\nvar: {varbox.T}, \n\ntgt: {box2.T}\n\n')
     
     if x1y1x2y2:
         b1_x, b1_y, b1_w, b1_h = (box1[0] + box1[2]) / 2, (box1[1] + box1[3]) / 2, box1[2] - box1[0], box1[3] - box1[1]
@@ -1011,13 +1007,15 @@ def bbox_nll(box1, box2, varbox, wh_scale, x1y1x2y2=True):
     loss_w = -torch.log(gaussian_dist_pdf(b1_w, b2_w, var_w) + 1e-9) / 2.0
     loss_h = -torch.log(gaussian_dist_pdf(b1_h, b2_h, var_h) + 1e-9) / 2.0
     
+    # print(f'Loss_x:{loss_x}\nLoss_y:{loss_y}\nLoss_x:{loss_w}\nLoss_w:{loss_h}\n')
+
     # loss = 1e-2 * ((loss_x + loss_y + loss_w + loss_h) * tscale).mean()
-    loss = loss_x + loss_y + loss_w + loss_h) * tscale
+    loss = (loss_x + loss_y + loss_w + loss_h).mean()
 
     # Ensure that the loss is non-negative
-    loss = torch.clamp(loss, min=0.0)
+    # loss = torch.clamp(loss, min=0.0)
 
-    # print(f'NLLloss:{loss}')
+    # print(f'NLLloss:{loss}\n')
     
     return loss
     
