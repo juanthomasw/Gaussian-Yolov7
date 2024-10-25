@@ -57,36 +57,17 @@ class Detect(nn.Module):
                     y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  # xy compensation term
                     y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh compensation term
 
-                    sigma_xywh = y[..., 4:8]
-                    sigma = sigma_xywh.mean(dim=-1)
+                    sigma = y[..., 4:8].mean(dim=-1)
                     y[..., 8] *= (1.0 - sigma)
-
-                    # unnormalize uncertainties
-                    # sigma_xywh = torch.sqrt(sigma_xywh)
-                    # sigma_xywh[..., :2] *= self.stride[i]
-                    # sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
-
-                    # y[..., 4:8] = sigma_xywh
                     
                 else:
-                    xy = y[..., 0:2]
-                    wh = y[..., 2:4]
-                    sigma_xywh = y[..., 4:8]
-                    c_obj = y[..., 8:9]
-                    c_cls = y[..., 9:]
-                    
-                    xy = xy * (2. * self.stride[i]) + (self.stride[i] * (self.grid[i] - 0.5))  # new xy
-                    wh = wh ** 2 * (4 * self.anchor_grid[i].data)  # new wh
+                    xy = y[..., 0:2] * (2. * self.stride[i]) + (self.stride[i] * (self.grid[i] - 0.5))  # new xy
+                    wh = y[..., 2:4] ** 2 * (4 * self.anchor_grid[i].data)  # new wh
 
-                    sigma = sigma_xywh.mean(dim=-1)
-                    c_obj *= (1.0 - sigma)
-
-                    # unnormalize uncertainties
-                    # sigma_xywh = torch.sqrt(sigma_xywh)
-                    # sigma_xywh[..., :2] *= self.stride[i]
-                    # sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
+                    sigma = y[..., 4:8].mean(dim=-1)
+                    y[...,8] *= (1.0 - sigma)
                     
-                    y = torch.cat((xy, wh, sigma_xywh, c_obj, c_cls), -1)
+                    y = torch.cat((xy, wh, y[..., 4:]), -1)
                     
                 z.append(y.view(bs, -1, self.no))
 
@@ -162,16 +143,8 @@ class IDetect(nn.Module):
                 y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  # xy compensation term
                 y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh compensation term
 
-                sigma_xywh = y[..., 4:8]
-                sigma = sigma_xywh.mean(dim=-1)
-                y[..., 8] *= (1.0 - sigma)
-
-                # unnormalize uncertainties
-                # sigma_xywh = torch.sqrt(sigma_xywh)
-                # sigma_xywh[..., :2] *= self.stride[i]
-                # sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
-
-                # y[..., 4:8] = sigma_xywh
+                sigma = y[..., 4:8].mean(dim=-1)
+                y[...,8] *= (1.0 - sigma)
                 
                 z.append(y.view(bs, -1, self.no)) # flatten tensor along second dimension -> shape(ns, na*nx*ny, no)
 
@@ -195,36 +168,17 @@ class IDetect(nn.Module):
                     y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  # xy
                     y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh
 
-                    sigma_xywh = y[..., 4:8]
-                    sigma = sigma_xywh.mean(dim=-1)
-                    y[..., 8] *= (1.0 - sigma)
-
-                    # unnormalize uncertainties
-                    # sigma_xywh = torch.sqrt(sigma_xywh)
-                    # sigma_xywh[..., :2] *= self.stride[i]
-                    # sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
-
-                    # y[..., 4:8] = sigma_xywh
+                    sigma = y[..., 4:8].mean(dim=-1)
+                    y[...,8] *= (1.0 - sigma)
                 
                 else:
-                    xy = y[..., 0:2]
-                    wh = y[..., 2:4]
-                    sigma_xywh = y[..., 4:8]
-                    c_obj = y[..., 8:9]
-                    c_cls = y[..., 9:]
-                    
-                    xy = xy * (2. * self.stride[i]) + (self.stride[i] * (self.grid[i] - 0.5))  # new xy
-                    wh = wh ** 2 * (4 * self.anchor_grid[i].data)  # new wh
+                    xy = y[..., 0:2] * (2. * self.stride[i]) + (self.stride[i] * (self.grid[i] - 0.5))  # new xy
+                    wh = y[..., 2:4] ** 2 * (4 * self.anchor_grid[i].data)  # new wh
 
-                    sigma = sigma_xywh.mean(dim=-1)
-                    c_obj *= (1.0 - sigma)
-
-                    # unnormalize uncertainties
-                    # sigma_xywh = torch.sqrt(sigma_xywh)
-                    # sigma_xywh[..., :2] *= self.stride[i]
-                    # sigma_xywh[..., 2:] = torch.exp(sigma_xywh[..., 2:])
+                    sigma = y[..., 4:8].mean(dim=-1)
+                    y[...,8] *= (1.0 - sigma)
                     
-                    y = torch.cat((xy, wh, sigma_xywh, c_obj, c_cls), -1)
+                    y = torch.cat((xy, wh, y[..., 4:]), -1)
                     
                 z.append(y.view(bs, -1, self.no)) # flatten tensor along second dimension -> shape(ns, na*nx*ny, no)
 
