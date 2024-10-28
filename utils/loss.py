@@ -470,7 +470,8 @@ class ComputeLoss:
                 pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, tbox[i], pvarbox.T, twh[i], x1y1x2y2=False)
                 
-                lbox += lnll.mean()
+                # lbox += lnll.mean()
+                lbox += (1 / (1 + lnll)).mean()
 
                 # Objectness
                 tobj[b, a, gj, gi] = (1.0 - self.gr) + self.gr * iou.detach().clamp(0).type(tobj.dtype)  # iou ratio
@@ -625,7 +626,8 @@ class ComputeLossOTA:
                 pvarbox =  ps[:, 4:8].sigmoid()
                 lnll = bbox_nll(pbox.T, selected_tbox, pvarbox.T, twh, x1y1x2y2=False)
 
-                lbox +=  lnll.mean()
+                # lbox +=  lnll.mean()
+                lbox += (1 / (1 + lnll)).mean()
 
                 # Objectness
                 tobj[b, a, gj, gi] = (1.0 - self.gr) + self.gr * iou.detach().clamp(0).type(tobj.dtype)  # iou ratio
