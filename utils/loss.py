@@ -525,8 +525,6 @@ class ComputeLoss:
 
             # Match targets to anchors
             t = targets * gain
-
-            t_original = targets
             
             if nt:
                 # Matches
@@ -534,7 +532,6 @@ class ComputeLoss:
                 j = torch.max(r, 1. / r).max(2)[0] < self.hyp['anchor_t']  # compare
                 # j = wh_iou(anchors, t[:, 4:6]) > model.hyp['iou_t']  # iou(3,n)=wh_iou(anchors(3,2), gwh(n,2))
                 t = t[j]  # filter
-                t_original = t_original[j]
 
                 # Offsets
                 gxy = t[:, 2:4]  # grid xy
@@ -543,8 +540,9 @@ class ComputeLoss:
                 l, m = ((gxi % 1. < g) & (gxi > 1.)).T
                 j = torch.stack((torch.ones_like(j), j, k, l, m))
                 t = t.repeat((5, 1, 1))[j]
-                t_original = t_original.repeat((5, 1, 1))[j]
                 offsets = (torch.zeros_like(gxy)[None] + off[:, None])[j]
+
+                t_original = t / gain
             else:
                 t = targets[0]
                 t_original = targets[0]
