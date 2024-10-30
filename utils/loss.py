@@ -543,10 +543,12 @@ class ComputeLoss:
                 offsets = (torch.zeros_like(gxy)[None] + off[:, None])[j]
 
                 t_original = t / gain
+                
             else:
                 t = targets[0]
-                t_original = targets[0]
                 offsets = 0
+
+                t_original = targets[0]
 
             # Define
             b, c = t[:, :2].long().T  # image, class
