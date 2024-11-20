@@ -1013,7 +1013,7 @@ def bbox_nll(box1, box2, varbox, wh_scale, x1y1x2y2=True):
     # rescale loss to 1/100
     
     # Ensure that the loss is between 0 and 1
-    loss = loss = torch.clamp(loss, min=0.0, max=1.0)
+    loss = torch.clamp(loss, min=0.0, max=1.0)
 
     # print(f'NLLloss:{loss}\n')
     
